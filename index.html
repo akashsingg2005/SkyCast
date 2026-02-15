@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkyCast | Local, National, &amp; Global Daily Weather Forecast</title>
+    <link rel="icon" href="weather.png">
+    <!-- External Dependencies -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="flex flex-col items-center justify-start p-4 md:p-8 lg:p-12">
+    <!-- Background Elements -->
+    <div id="dynamic-bg" class="weather-bg state-clear"></div>
+    <div id="animation-layer"></div>
+
+    <!-- --- 2. STRUCTURE (Put this in index.html) --- -->
+    <div class="w-full max-w-7xl grid grid-cols-1 md:grid-cols-12 gap-6 relative z-10">
+        
+        <!-- Header -->
+        <header class="md:col-span-12 flex flex-col md:flex-row justify-between items-center gap-6 mb-2">
+            <div class="flex items-center gap-4 md:gap-6">
+                <div class="p-3 md:p-5 glass neon-border rounded-2xl md:rounded-3xl">
+                    <i id="logo-icon" class="fas fa-atom text-2xl md:text-4xl text-cyan-400 animate-pulse-slow"></i>
+                </div>
+                <div>
+                    <h1 class="text-3xl md:text-5xl font-black italic tracking-tighter uppercase font-space leading-tight">Sky<span class="text-cyan-400 glow-text-cyan">Cast</span></h1>
+                    <p class="text-[8px] md:text-[10px] font-black opacity-30 tracking-[0.3em] md:tracking-[0.5em] uppercase mt-1" id="current-date"></p>
+                </div>
+            </div>
+
+            <div class="flex gap-2 w-full md:w-auto">
+                <div class="relative flex-grow md:w-[300px] lg:w-[450px]">
+                    <input type="text" id="city-input" placeholder="Search..." 
+                           class="search-field w-full py-4 md:py-5 px-6 md:px-10 rounded-full text-white placeholder-cyan-100/10 text-xs font-black tracking-widest uppercase">
+                    <button id="search-btn" class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 md:w-12 md:h-12 rounded-full bg-cyan-500/5 flex items-center justify-center border border-cyan-500/20 hover:bg-cyan-500/20">
+                        <i class="fas fa-satellite-dish text-cyan-400"></i>
+                    </button>
+                </div>
+                <button id="geo-btn" class="p-4 md:p-5 glass neon-border rounded-full hover:bg-cyan-400/10" title="Locate Sector">
+                    <i class="fas fa-location-crosshairs text-cyan-400"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Atmospheric Processor -->
+        <main class="md:col-span-8 glass neon-border p-6 md:p-10 lg:p-12 flex flex-col justify-between min-h-[500px] overflow-hidden" id="main-card">
+            <div id="loader" class="hidden absolute inset-0 glass z-50 flex items-center justify-center rounded-[24px]">
+                <div class="flex flex-col items-center gap-6 text-center">
+                    <div class="spinner"></div>
+                    <p class="text-[10px] font-black tracking-[0.4em] uppercase text-cyan-400">Retrieving Data...</p>
+                </div>
+            </div>
+
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 lg:gap-4">
+                <div class="space-y-4 flex-grow max-w-full">
+                    <div class="flex items-center gap-3">
+                        <div class="w-2 md:w-3 h-8 md:h-12 bg-cyan-400 rounded-full shadow-[0_0_20px_#00f3ff]"></div>
+                        <h2 class="text-4xl sm:text-6xl md:text-7xl font-black tracking-tighter font-space truncate" id="city-name">--</h2>
+                    </div>
+                    <p class="text-xl md:text-3xl font-bold text-purple-400 tracking-wider uppercase" id="weather-description">INITIATING...</p>
+                    <div class="flex flex-wrap items-center gap-3 text-[10px] md:text-xs font-black opacity-40 uppercase tracking-widest">
+                        <span>High: <span id="temp-max" class="text-white">--°C</span></span>
+                        <span class="w-1 h-1 bg-white/20 rounded-full"></span>
+                        <span>Low: <span id="temp-min" class="text-white">--°C</span></span>
+                    </div>
+                </div>
+                <div class="lg:text-right flex-shrink-0">
+                    <span class="font-black tracking-tighter text-white glow-text-cyan font-space temp-display" id="main-temp">--°C</span>
+                    <p class="text-sm md:text-xl font-bold opacity-30 uppercase tracking-[0.3em] mt-2">Feels Like <span id="feels-like" class="text-white opacity-100 ml-2">--°C</span></p>
+                </div>
+            </div>
+
+            <!-- AI Insight -->
+            <div class="mt-8 md:mt-10 p-6 md:p-8 bg-black/50 border border-white/5 rounded-3xl relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-cyan-400 via-purple-500 to-pink-500"></div>
+                <span class="text-[8px] md:text-[9px] uppercase tracking-[0.3em] font-black text-cyan-400 mb-2 block">AI Insight</span>
+                <p id="ai-summary" class="text-sm md:text-lg lg:text-xl leading-relaxed text-white/90 font-medium font-space">
+                    "Syncing atmosphere stream..."
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 mt-8 md:mt-10 pt-8 border-t border-white/5">
+                <div class="stat-box p-4 rounded-3xl text-center">
+                    <p class="text-[8px] md:text-[10px] uppercase font-black opacity-40 mb-1">Humidity</p>
+                    <p class="text-2xl font-black font-space" id="humidity">--</p>
+                </div>
+                <div class="stat-box p-4 rounded-3xl text-center">
+                    <p class="text-[8px] md:text-[10px] uppercase font-black opacity-40 mb-1">Wind Speed</p>
+                    <p class="text-2xl font-black font-space" id="wind-speed">--</p>
+                </div>
+                <div class="stat-box p-4 rounded-3xl text-center">
+                    <p class="text-[8px] md:text-[10px] uppercase font-black opacity-40 mb-1">Visibility</p>
+                    <p class="text-2xl font-black font-space" id="visibility">--</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Sidebar -->
+        <aside class="md:col-span-4 flex flex-col gap-6">
+            <div class="glass neon-border p-6 md:p-8 flex-1 flex flex-col">
+                <h3 class="text-[10px] md:text-xs font-black uppercase tracking-[0.4em] mb-8 flex items-center justify-between">
+                    <span>Next 24-hour tracking</span>
+                    <i class="fas fa-bolt text-cyan-400"></i>
+                </h3>
+                <div class="flex-grow overflow-y-auto space-y-4 pr-2 hourly-container" id="hourly-list">
+                    <div class="flex items-center justify-center opacity-20 py-10">Awaiting Data...</div>
+                </div>
+            </div>
+
+            <div class="glass neon-border p-6 md:p-8">
+                <div class="flex justify-between items-center gap-4">
+                    <div class="text-center flex-1">
+                        <i class="fas fa-sun text-cyan-400 text-2xl mb-2"></i>
+                        <p class="text-[8px] uppercase font-black opacity-30 mb-1">Rise</p>
+                        <p class="text-sm md:text-xl font-black font-space" id="sunrise">--:--</p>
+                    </div>
+                    <div class="w-[1px] h-10 bg-white/10"></div>
+                    <div class="text-center flex-1">
+                        <i class="fas fa-moon text-purple-400 text-2xl mb-2"></i>
+                        <p class="text-[8px] uppercase font-black opacity-30 mb-1">Set</p>
+                        <p class="text-sm md:text-xl font-black font-space" id="sunset">--:--</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Copyright -->
+        <footer class="md:col-span-12 mt-6 py-6 text-center border-t border-white/5">
+            <p class="text-[10px] md:text-xs font-black opacity-30 tracking-[0.2em] uppercase">
+                &copy; 2026 SkyCast. All Rights Reserved By Babusaheb. | Engineered by 
+                <a href="https://www.linkedin.com/in/akashsingh2005/" target="_blank" class="text-cyan-400 hover:glow-text-cyan">Akash Kumar Singh</a>
+            </p>
+        </footer>
+    </div>
+
+    <!-- Error HUD -->
+    <div id="error-toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 px-8 py-4 bg-black/90 backdrop-blur-2xl border border-red-500 text-red-500 rounded-full text-xs font-black tracking-[0.2em] uppercase transform translate-y-48 transition-transform duration-700 z-[100]">
+        <span id="error-message">Signal Interference</span>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
