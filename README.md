@@ -84,6 +84,17 @@ SkyCast is fully responsive and optimized for:
 
 * Improved error handling and loading states.
 
+## 📸 App Preview:
+
+### 💻 Desktop View
+
+ <img width="1895" height="901" alt="Screenshot 2026-02-15 150058" src="https://github.com/user-attachments/assets/d52131cb-04f2-440f-a280-962a1114960b" />
+
+### 📱 Mobile View
+
+![skycast mobile view](https://github.com/user-attachments/assets/7adbb3ca-f5b2-4026-b9ef-53e7d212d24f)
+
+
 ## 👨‍💻 Author
 **Akash Kumar Singh**
 
